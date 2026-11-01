@@ -48,6 +48,7 @@ const CALC_JS = `
 const SYS = window.__SYS__;
 const cpm = (s,p)=>p/(s.btu*s.eff/1e6);
 const $ = id => document.getElementById(id);
+try{const q=parseFloat(new URLSearchParams(location.search).get('load'));if(q>0&&q<2000&&$('load'))$('load').value=q;}catch(e){}
 const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
 function runIndex(){
   const load = parseFloat($('load').value)||0;
@@ -88,7 +89,7 @@ ${extraHead}
 <main class="w">${body}</main>
 <footer><div class="w">
 <p><b>Disclosure:</b> As an Amazon Associate I earn from qualifying purchases. Some links on this site are affiliate links; we may earn a commission at no cost to you. Figures are estimates based on standard fuel energy content and typical equipment efficiency. Actual costs vary with your home, climate, equipment and local prices. Not professional advice.</p>
-<p><a href="/about/">About &amp; methodology</a> · <a href="/privacy/">Privacy</a></p>
+<p><a href="/tools/heat-need/">Find your heat need</a> · <a href="/guides/">Guides</a> · <a href="/state/">By state</a> · <a href="/about/">About &amp; methodology</a> · <a href="/privacy/">Privacy</a></p>
 </div></footer></body></html>`;
 
 const AMAZON_TAG = process.env.AMAZON_TAG || 'earthazoid-20';
@@ -152,7 +153,7 @@ for (const [a, b] of pairs) {
  <div class="grid">
   <div><label for="pa">${esc(a.short)} price ($ per ${a.unit})</label><input id="pa" type="number" step="0.01" value="${a.price}"></div>
   <div><label for="pb">${esc(b.short)} price ($ per ${b.unit})</label><input id="pb" type="number" step="0.01" value="${b.price}"></div>
-  <div><label for="load">Annual heat needed (MMBtu delivered)</label><input id="load" type="number" step="1" value="${DEFAULT_LOAD}"></div>
+  <div><label for="load">Annual heat needed (MMBtu delivered) · <a href="/tools/heat-need/">find yours</a></label><input id="load" type="number" step="1" value="${DEFAULT_LOAD}"></div>
  </div>
  <table><tr><th>${esc(a.short)} per year</th><th>${esc(b.short)} per year</th></tr>
  <tr><td class="big" id="ra"></td><td class="big" id="rb"></td></tr></table>
@@ -186,10 +187,11 @@ write('index.html', layout({
   body: `<h1>Home Heating Cost Calculator</h1>
 <p>Enter your local fuel prices to rank eight common heating systems by estimated yearly cost. Starting prices for oil, propane, gas and electricity are U.S. average winter 2026-27 forecasts from the EIA; kerosene, pellets and cordwood are rough estimates. Replace them with your own local prices.</p>
 <div class="card"><div class="grid">${inputs}
-<div><label for="load">Annual heat needed (MMBtu delivered)</label><input id="load" type="number" value="${DEFAULT_LOAD}"></div></div>
+<div><label for="load">Annual heat needed (MMBtu delivered) · <a href="/tools/heat-need/">find yours</a></label><input id="load" type="number" value="${DEFAULT_LOAD}"></div></div>
 <table><tr><th>#</th><th>System</th><th>Cost per MMBtu</th><th>Estimated yearly cost</th></tr><tbody id="out"></tbody></table></div>
 ${affiliateSlot('Compare heating options')}
 <h2>Heating costs by state</h2><p><a href="/state/">Start with your state's electricity rate →</a></p>
+<h2>Tools and guides</h2><ul><li><a href="/tools/heat-need/">How much heat does your home use? (from your fuel bills)</a></li><li><a href="/guides/heat-pump-vs-oil-what-decides/">Heat pump vs heating oil: what decides which costs less</a></li><li><a href="/guides/btu-mmbtu-therm-kwh/">BTU, MMBtu, therm and kWh explained</a></li></ul>
 <h2>Head-to-head comparisons</h2><ul class="links">${allLinks}</ul>
 <script>window.__SYS__=${JSON.stringify(SYSTEMS)};window.__RUN__='index';</script><script src="/calc.js"></script>`,
 }));
@@ -235,7 +237,7 @@ for (const name of stateNames) {
 <h1>Home Heating Costs in ${esc(name)}</h1>
 <p>${esc(name)} residential electricity averaged <b>${cents.toFixed(2)} cents per kWh</b> in August 2026 (EIA), which ranks ${rank} of ${ranked.length} among states and DC from highest to lowest. Electricity price is the biggest state-by-state difference for heat pumps and electric heat, so the calculator below starts with ${esc(name)}'s rate for those two systems and U.S. average winter 2026-27 forecasts for oil, propane and natural gas. Replace any price with your own.</p>
 <div class="card"><div class="grid">${inputs2}
-<div><label for="load">Annual heat needed (MMBtu delivered)</label><input id="load" type="number" value="${DEFAULT_LOAD}"></div></div>
+<div><label for="load">Annual heat needed (MMBtu delivered) · <a href="/tools/heat-need/">find yours</a></label><input id="load" type="number" value="${DEFAULT_LOAD}"></div></div>
 <table><tr><th>#</th><th>System</th><th>Cost per MMBtu</th><th>Estimated yearly cost</th></tr><tbody id="out"></tbody></table></div>
 ${affiliateSlot(`Heating a home in ${name}?`, [hp, oil])}
 <h2>${esc(name)} at default prices</h2>
@@ -255,8 +257,98 @@ ${affiliateSlot(`Heating a home in ${name}?`, [hp, oil])}
 write('state/index.html', layout({
   title: 'Home Heating Costs by State', desc: 'State-by-state home heating cost calculators using local electricity rates.', canonical: '/state/',
   body: `<h1>Home Heating Costs by State</h1><p>Pick your state to start the calculator with its residential electricity rate (EIA, August 2026).</p>
-<ul class="links">${stateNames.map(n => `<li><a href="/state/${slugOf(n)}/">${esc(n)}</a> (${ELEC[n].toFixed(2)}¢/kWh)</li>`).join('')}</ul>`,
+<ul class="links">${stateNames.map(n => `<li><a href="/state/${slugOf(n)}/">${esc(n)}</a> (${ELEC[n].toFixed(2)}¢/kWh)</li>`).join('')}</ul>
+<script>try{var q=parseFloat(new URLSearchParams(location.search).get('load'));if(q>0&&q<2000)document.querySelectorAll('ul.links a').forEach(function(a){a.href+='?load='+q;});}catch(e){}</script>`,
 }));
+
+// ---------- Heat-need tool ----------
+urls.push('/tools/heat-need/');
+{
+  const rows = SYSTEMS.map(s => `<tr><td>${esc(s.name)}</td>
+<td><input id="amt-${s.id}" type="number" min="0" step="any" placeholder="0" aria-label="${esc(s.short)} used per year"></td>
+<td>${esc(s.unit)}${s.unit === 'kWh' ? ' (heating only)' : ''}</td>
+<td><input id="eff-${s.id}" type="number" min="1" step="1" value="${Math.round(s.eff * 100)}" aria-label="${esc(s.short)} efficiency percent"></td></tr>`).join('');
+  const js = `
+const SYS=${JSON.stringify(SYSTEMS.map(s => ({ id: s.id, btu: s.btu })))};
+function run(){let t=0;for(const s of SYS){const a=parseFloat(document.getElementById('amt-'+s.id).value)||0;const e=(parseFloat(document.getElementById('eff-'+s.id).value)||0)/100;t+=a*s.btu*e/1e6;}
+document.getElementById('res').textContent=t.toFixed(1);
+const v=t>0?t.toFixed(1):'';
+document.getElementById('go').innerHTML=t>0?'<a href="/?load='+v+'">Rank all systems with '+v+' MMBtu →</a> · <a href="/state/?load='+v+'">Pick your state</a>':'';}
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',run));run();`;
+  const body = `
+<h1>How Much Heat Does Your Home Use?</h1>
+<p>Enter what you actually burned or used for heating over a full year, from your fuel delivery receipts or utility bills. The tool converts it to <b>MMBtu of delivered heat</b>, the number every calculator on this site asks for. It multiplies each fuel by its energy content and by your system's efficiency, so a gallon of oil burned in an 85% efficient boiler counts for less than the gallon's full energy.</p>
+<div class="card">
+<table><tr><th>Fuel / system</th><th>Used per year</th><th>Unit</th><th>Efficiency %</th></tr>${rows}</table>
+<p>Delivered heat: <span class="big" id="res">0.0</span> MMBtu per year</p>
+<p id="go"></p>
+</div>
+<h2>Tips for good numbers</h2>
+<ul>
+<li>Use a full 12 months so you capture the whole heating season.</li>
+<li>For electricity, enter only the kWh used for heating (a heat pump or baseboard heat), not the whole house. If you can't separate it, leave electricity blank and treat the result as a floor.</li>
+<li>Efficiency defaults are typical values (for example 85% oil, 92% gas, 250% heat pump). Use your equipment's rated figure if you know it. Heat pump efficiency of 250% means a seasonal COP of 2.5.</li>
+<li>If you changed systems or added insulation recently, last year's fuel use may not predict next year's.</li>
+<li>If you can't find your numbers, the default of ${DEFAULT_LOAD} MMBtu on the calculators is a rough starting point only.</li>
+</ul>
+<p>Energy contents used: oil 138,500 BTU/gal, propane 91,500 BTU/gal, natural gas 100,000 BTU/therm, kerosene 135,000 BTU/gal, electricity 3,412 BTU/kWh, pellets about 16.5 million BTU/ton, cordwood about 22 million BTU/cord. See <a href="/guides/btu-mmbtu-therm-kwh/">the units guide</a>.</p>
+<script>${js}</script>`;
+  write('tools/heat-need/index.html', layout({ title: 'How Much Heat Does My Home Use? Annual MMBtu Calculator', desc: 'Convert a year of oil, propane, gas, electric, pellet or wood use into delivered heat (MMBtu) to feed any heating cost calculator.', canonical: '/tools/heat-need/', body }));
+}
+
+// ---------- Guides ----------
+urls.push('/guides/', '/guides/btu-mmbtu-therm-kwh/', '/guides/heat-pump-vs-oil-what-decides/');
+{
+  const fuelRows = SYSTEMS.map(s => `<tr><td>${esc(s.short)}</td><td>${s.btu.toLocaleString('en-US')} BTU per ${s.unit}</td><td>${Math.round(s.eff * 100)}%</td><td>$${costPerMMBtu(s, s.price).toFixed(2)}</td></tr>`).join('');
+  const units = `
+<h1>BTU, MMBtu, Therm and kWh: The Units Behind Heating Costs</h1>
+<p>Heating fuels are sold in different units: gallons, therms, kilowatt-hours, tons, cords. To compare them fairly, convert everything to one unit of <i>delivered heat</i>. This site uses the MMBtu (one million BTU).</p>
+<h2>The basic conversions</h2>
+<ul><li><b>BTU:</b> a small unit of heat energy.</li>
+<li><b>MMBtu:</b> 1,000,000 BTU. (The "MM" is the traditional Roman-numeral-style "thousand thousand".)</li>
+<li><b>Therm:</b> 100,000 BTU, so 10 therms = 1 MMBtu. Natural gas is often billed in therms or in hundreds or thousands of cubic feet (Ccf, Mcf); one Mcf is roughly 10 therms.</li>
+<li><b>kWh:</b> 3,412 BTU, so about 293 kWh = 1 MMBtu.</li></ul>
+<h2>Efficiency is what turns fuel into heat</h2>
+<p>Furnaces and boilers are rated by AFUE, the share of the fuel's energy that ends up as heat in the house. An 85% oil boiler delivers 0.85 of each gallon's energy. Electric resistance heat is essentially 100% efficient at the point of use. A heat pump moves heat rather than making it, so it can deliver more than 100%: a seasonal coefficient of performance (COP) of 2.5 means 250%. Manufacturers often publish HSPF or HSPF2 instead; dividing HSPF by 3.412 gives a rough COP, though real results depend on your climate and installation.</p>
+<h2>The formula</h2>
+<p><b>Cost per MMBtu = price per unit ÷ (BTU per unit × efficiency ÷ 1,000,000)</b></p>
+<p>Example: heating oil at $5.26 per gallon in an 85% boiler. A gallon holds 138,500 BTU, so it delivers 138,500 × 0.85 = 117,725 BTU. Cost per MMBtu = 5.26 ÷ 0.117725 ≈ <b>$44.68</b>. A heat pump at 18 cents per kWh and a COP of 2.5 delivers 3,412 × 2.5 = 8,530 BTU per kWh, so 0.18 ÷ 0.00853 ≈ <b>$21.10</b> per MMBtu.</p>
+<h2>This site's defaults</h2>
+<table><tr><th>System</th><th>Energy content</th><th>Efficiency</th><th>Cost per MMBtu at default price</th></tr>${fuelRows}</table>
+<p class="mut">Defaults for oil, propane, natural gas and electricity are U.S. average EIA winter 2026-27 forecasts; kerosene, pellets and cordwood are rough estimates. Your local prices will differ.</p>
+<p>Next: <a href="/tools/heat-need/">work out how many MMBtu your home actually uses</a>, then <a href="/">rank the systems with your prices</a>.</p>`;
+  write('guides/btu-mmbtu-therm-kwh/index.html', layout({ title: 'BTU, MMBtu, Therm and kWh Explained for Home Heating', desc: 'How to convert gallons, therms and kilowatt-hours into comparable heating costs, with the formula and worked examples.', canonical: '/guides/btu-mmbtu-therm-kwh/', body: units }));
+
+  // break-even table: electricity price (cents/kWh) at which a heat pump matches oil, by COP and oil price
+  const cops = [2, 2.5, 3], oilPrices = [4, 5.26, 6, 7];
+  const be = (op, cop) => (costPerMMBtu(oil, op) * (3412 * cop / 1e6) * 100).toFixed(1);
+  const beRows = oilPrices.map(op => `<tr><td>$${op.toFixed(2)}</td>${cops.map(c => `<td>${be(op, c)}¢</td>`).join('')}</tr>`).join('');
+  const hpoil = `
+<h1>Heat Pump vs Heating Oil: What Actually Decides Which Costs Less</h1>
+<p>The answer comes down to two ratios: how expensive electricity is compared with oil, and how efficiently your heat pump turns each kilowatt-hour into heat. Everything else, including upfront cost, incentives and comfort, matters too, but running cost is determined by these.</p>
+<h2>The break-even electricity price</h2>
+<p>An oil boiler at 85% efficiency delivers 117,725 BTU per gallon. A heat pump with a seasonal COP of 2.5 delivers 8,530 BTU per kWh. Setting the two costs per MMBtu equal gives the electricity price at which they tie. Below it, the heat pump is cheaper to run; above it, oil is.</p>
+<table><tr><th>Oil price per gallon</th><th>COP 2.0</th><th>COP 2.5</th><th>COP 3.0</th></tr>${beRows}</table>
+<p class="mut">Break-even electricity price in cents per kWh, assuming an 85% efficient oil boiler. If your electricity costs less than the figure in your row and column, the heat pump costs less to run.</p>
+<h2>Why COP is the swing factor</h2>
+<p>Heat pump efficiency falls as outdoor temperatures drop, so a unit that reaches a COP of 3 in mild weather may average much lower over a cold winter. Use a seasonal figure for your climate, from the manufacturer's cold-climate data if available, rather than the best-case number. Moving from COP 2.0 to 3.0 raises the break-even electricity price by half, which is often the difference between a heat pump winning and losing.</p>
+<h2>What the running-cost math leaves out</h2>
+<ul><li><b>Purchase and installation cost</b> for the heat pump, duct or distribution work, and any electrical panel upgrade.</li>
+<li><b>Incentives:</b> federal, state and utility programs change often, so check current ones before deciding.</li>
+<li><b>Backup heat</b> for the coldest days, which may use oil or electric resistance and costs more per MMBtu.</li>
+<li><b>Maintenance and fuel storage:</b> oil needs tank and burner service; heat pumps need filter and coil care.</li>
+<li><b>Future price changes</b> for either fuel.</li></ul>
+<h2>Run your own numbers</h2>
+<p>Use the <a href="/compare/${pairSlug(oil, hp)}/">heating oil vs heat pump calculator</a> with your local prices, or look up your state's electricity rate on the <a href="/state/">state pages</a>. Not sure how much heat your home needs? <a href="/tools/heat-need/">Work it out from your fuel bills</a>.</p>
+${affiliateSlot('Before you switch', [hp, oil])}`;
+  write('guides/heat-pump-vs-oil-what-decides/index.html', layout({ title: 'Heat Pump vs Heating Oil: What Decides Which Costs Less', desc: 'Break-even electricity prices for heat pumps against heating oil at different oil prices and efficiencies, with what the math leaves out.', canonical: '/guides/heat-pump-vs-oil-what-decides/', body: hpoil }));
+
+  write('guides/index.html', layout({ title: 'Home Heating Guides', desc: 'Guides to heating units, efficiency and heat pump vs oil economics.', canonical: '/guides/',
+    body: `<h1>Home Heating Guides</h1><ul>
+<li><a href="/guides/btu-mmbtu-therm-kwh/">BTU, MMBtu, therm and kWh: the units behind heating costs</a></li>
+<li><a href="/guides/heat-pump-vs-oil-what-decides/">Heat pump vs heating oil: what decides which costs less</a></li>
+<li><a href="/tools/heat-need/">Tool: how much heat does your home use?</a></li></ul>` }));
+}
 
 // ---------- About / Privacy ----------
 write('about/index.html', layout({ title: `About ${SITE_NAME} and Methodology`, desc: 'How the heating cost calculations work.', canonical: '/about/',

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BTU, MMBtu, Therm and kWh Explained for Home Heating</title><meta name="description" content="How to convert gallons, therms and kilowatt-hours into comparable heating costs, with the formula and worked examples.">
+<link rel="canonical" href="https://bdthorndike-create.github.io/guides/btu-mmbtu-therm-kwh/">
+<link rel="stylesheet" href="/style.css">
+<!-- ANALYTICS: paste Cloudflare Web Analytics / Plausible snippet here -->
+<!-- ADSENSE: paste AdSense script here after approval -->
+
+</head><body>
+<header><div class="w"><a href="/">🔥 HeatCostCalc</a></div></header>
+<main class="w">
+<h1>BTU, MMBtu, Therm and kWh: The Units Behind Heating Costs</h1>
+<p>Heating fuels are sold in different units: gallons, therms, kilowatt-hours, tons, cords. To compare them fairly, convert everything to one unit of <i>delivered heat</i>. This site uses the MMBtu (one million BTU).</p>
+<h2>The basic conversions</h2>
+<ul><li><b>BTU:</b> a small unit of heat energy.</li>
+<li><b>MMBtu:</b> 1,000,000 BTU. (The "MM" is the traditional Roman-numeral-style "thousand thousand".)</li>
+<li><b>Therm:</b> 100,000 BTU, so 10 therms = 1 MMBtu. Natural gas is often billed in therms or in hundreds or thousands of cubic feet (Ccf, Mcf); one Mcf is roughly 10 therms.</li>
+<li><b>kWh:</b> 3,412 BTU, so about 293 kWh = 1 MMBtu.</li></ul>
+<h2>Efficiency is what turns fuel into heat</h2>
+<p>Furnaces and boilers are rated by AFUE, the share of the fuel's energy that ends up as heat in the house. An 85% oil boiler delivers 0.85 of each gallon's energy. Electric resistance heat is essentially 100% efficient at the point of use. A heat pump moves heat rather than making it, so it can deliver more than 100%: a seasonal coefficient of performance (COP) of 2.5 means 250%. Manufacturers often publish HSPF or HSPF2 instead; dividing HSPF by 3.412 gives a rough COP, though real results depend on your climate and installation.</p>
+<h2>The formula</h2>
+<p><b>Cost per MMBtu = price per unit ÷ (BTU per unit × efficiency ÷ 1,000,000)</b></p>
+<p>Example: heating oil at $5.26 per gallon in an 85% boiler. A gallon holds 138,500 BTU, so it delivers 138,500 × 0.85 = 117,725 BTU. Cost per MMBtu = 5.26 ÷ 0.117725 ≈ <b>$44.68</b>. A heat pump at 18 cents per kWh and a COP of 2.5 delivers 3,412 × 2.5 = 8,530 BTU per kWh, so 0.18 ÷ 0.00853 ≈ <b>$21.10</b> per MMBtu.</p>
+<h2>This site's defaults</h2>
+<table><tr><th>System</th><th>Energy content</th><th>Efficiency</th><th>Cost per MMBtu at default price</th></tr><tr><td>Heating oil</td><td>138,500 BTU per gallon</td><td>85%</td><td>$44.68</td></tr><tr><td>Propane</td><td>91,500 BTU per gallon</td><td>92%</td><td>$29.94</td></tr><tr><td>Natural gas</td><td>100,000 BTU per therm</td><td>92%</td><td>$14.13</td></tr><tr><td>Kerosene</td><td>135,000 BTU per gallon</td><td>80%</td><td>$41.67</td></tr><tr><td>Electric resistance</td><td>3,412 BTU per kWh</td><td>100%</td><td>$52.75</td></tr><tr><td>Heat pump</td><td>3,412 BTU per kWh</td><td>250%</td><td>$21.10</td></tr><tr><td>Wood pellets</td><td>16,500,000 BTU per ton</td><td>80%</td><td>$25.00</td></tr><tr><td>Cordwood</td><td>22,000,000 BTU per cord</td><td>65%</td><td>$20.98</td></tr></table>
+<p class="mut">Defaults for oil, propane, natural gas and electricity are U.S. average EIA winter 2026-27 forecasts; kerosene, pellets and cordwood are rough estimates. Your local prices will differ.</p>
+<p>Next: <a href="/tools/heat-need/">work out how many MMBtu your home actually uses</a>, then <a href="/">rank the systems with your prices</a>.</p></main>
+<footer><div class="w">
+<p><b>Disclosure:</b> As an Amazon Associate I earn from qualifying purchases. Some links on this site are affiliate links; we may earn a commission at no cost to you. Figures are estimates based on standard fuel energy content and typical equipment efficiency. Actual costs vary with your home, climate, equipment and local prices. Not professional advice.</p>
+<p><a href="/tools/heat-need/">Find your heat need</a> · <a href="/guides/">Guides</a> · <a href="/state/">By state</a> · <a href="/about/">About &amp; methodology</a> · <a href="/privacy/">Privacy</a></p>
+</div></footer></body></html>

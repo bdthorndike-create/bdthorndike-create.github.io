@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How Much Heat Does My Home Use? Annual MMBtu Calculator</title><meta name="description" content="Convert a year of oil, propane, gas, electric, pellet or wood use into delivered heat (MMBtu) to feed any heating cost calculator.">
+<link rel="canonical" href="https://bdthorndike-create.github.io/tools/heat-need/">
+<link rel="stylesheet" href="/style.css">
+<!-- ANALYTICS: paste Cloudflare Web Analytics / Plausible snippet here -->
+<!-- ADSENSE: paste AdSense script here after approval -->
+
+</head><body>
+<header><div class="w"><a href="/">🔥 HeatCostCalc</a></div></header>
+<main class="w">
+<h1>How Much Heat Does Your Home Use?</h1>
+<p>Enter what you actually burned or used for heating over a full year, from your fuel delivery receipts or utility bills. The tool converts it to <b>MMBtu of delivered heat</b>, the number every calculator on this site asks for. It multiplies each fuel by its energy content and by your system's efficiency, so a gallon of oil burned in an 85% efficient boiler counts for less than the gallon's full energy.</p>
+<div class="card">
+<table><tr><th>Fuel / system</th><th>Used per year</th><th>Unit</th><th>Efficiency %</th></tr><tr><td>Heating oil furnace/boiler</td>
+<td><input id="amt-heating-oil" type="number" min="0" step="any" placeholder="0" aria-label="Heating oil used per year"></td>
+<td>gallon</td>
+<td><input id="eff-heating-oil" type="number" min="1" step="1" value="85" aria-label="Heating oil efficiency percent"></td></tr><tr><td>Propane furnace/boiler</td>
+<td><input id="amt-propane" type="number" min="0" step="any" placeholder="0" aria-label="Propane used per year"></td>
+<td>gallon</td>
+<td><input id="eff-propane" type="number" min="1" step="1" value="92" aria-label="Propane efficiency percent"></td></tr><tr><td>Natural gas furnace/boiler</td>
+<td><input id="amt-natural-gas" type="number" min="0" step="any" placeholder="0" aria-label="Natural gas used per year"></td>
+<td>therm</td>
+<td><input id="eff-natural-gas" type="number" min="1" step="1" value="92" aria-label="Natural gas efficiency percent"></td></tr><tr><td>Kerosene heater/furnace</td>
+<td><input id="amt-kerosene" type="number" min="0" step="any" placeholder="0" aria-label="Kerosene used per year"></td>
+<td>gallon</td>
+<td><input id="eff-kerosene" type="number" min="1" step="1" value="80" aria-label="Kerosene efficiency percent"></td></tr><tr><td>Electric baseboard/resistance</td>
+<td><input id="amt-electric" type="number" min="0" step="any" placeholder="0" aria-label="Electric resistance used per year"></td>
+<td>kWh (heating only)</td>
+<td><input id="eff-electric" type="number" min="1" step="1" value="100" aria-label="Electric resistance efficiency percent"></td></tr><tr><td>Cold-climate heat pump</td>
+<td><input id="amt-heat-pump" type="number" min="0" step="any" placeholder="0" aria-label="Heat pump used per year"></td>
+<td>kWh (heating only)</td>
+<td><input id="eff-heat-pump" type="number" min="1" step="1" value="250" aria-label="Heat pump efficiency percent"></td></tr><tr><td>Wood pellet stove</td>
+<td><input id="amt-wood-pellets" type="number" min="0" step="any" placeholder="0" aria-label="Wood pellets used per year"></td>
+<td>ton</td>
+<td><input id="eff-wood-pellets" type="number" min="1" step="1" value="80" aria-label="Wood pellets efficiency percent"></td></tr><tr><td>Cordwood stove</td>
+<td><input id="amt-cordwood" type="number" min="0" step="any" placeholder="0" aria-label="Cordwood used per year"></td>
+<td>cord</td>
+<td><input id="eff-cordwood" type="number" min="1" step="1" value="65" aria-label="Cordwood efficiency percent"></td></tr></table>
+<p>Delivered heat: <span class="big" id="res">0.0</span> MMBtu per year</p>
+<p id="go"></p>
+</div>
+<h2>Tips for good numbers</h2>
+<ul>
+<li>Use a full 12 months so you capture the whole heating season.</li>
+<li>For electricity, enter only the kWh used for heating (a heat pump or baseboard heat), not the whole house. If you can't separate it, leave electricity blank and treat the result as a floor.</li>
+<li>Efficiency defaults are typical values (for example 85% oil, 92% gas, 250% heat pump). Use your equipment's rated figure if you know it. Heat pump efficiency of 250% means a seasonal COP of 2.5.</li>
+<li>If you changed systems or added insulation recently, last year's fuel use may not predict next year's.</li>
+<li>If you can't find your numbers, the default of 70 MMBtu on the calculators is a rough starting point only.</li>
+</ul>
+<p>Energy contents used: oil 138,500 BTU/gal, propane 91,500 BTU/gal, natural gas 100,000 BTU/therm, kerosene 135,000 BTU/gal, electricity 3,412 BTU/kWh, pellets about 16.5 million BTU/ton, cordwood about 22 million BTU/cord. See <a href="/guides/btu-mmbtu-therm-kwh/">the units guide</a>.</p>
+<script>
+const SYS=[{"id":"heating-oil","btu":138500},{"id":"propane","btu":91500},{"id":"natural-gas","btu":100000},{"id":"kerosene","btu":135000},{"id":"electric","btu":3412},{"id":"heat-pump","btu":3412},{"id":"wood-pellets","btu":16500000},{"id":"cordwood","btu":22000000}];
+function run(){let t=0;for(const s of SYS){const a=parseFloat(document.getElementById('amt-'+s.id).value)||0;const e=(parseFloat(document.getElementById('eff-'+s.id).value)||0)/100;t+=a*s.btu*e/1e6;}
+document.getElementById('res').textContent=t.toFixed(1);
+const v=t>0?t.toFixed(1):'';
+document.getElementById('go').innerHTML=t>0?'<a href="/?load='+v+'">Rank all systems with '+v+' MMBtu →</a> · <a href="/state/?load='+v+'">Pick your state</a>':'';}
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',run));run();</script></main>
+<footer><div class="w">
+<p><b>Disclosure:</b> As an Amazon Associate I earn from qualifying purchases. Some links on this site are affiliate links; we may earn a commission at no cost to you. Figures are estimates based on standard fuel energy content and typical equipment efficiency. Actual costs vary with your home, climate, equipment and local prices. Not professional advice.</p>
+<p><a href="/tools/heat-need/">Find your heat need</a> · <a href="/guides/">Guides</a> · <a href="/state/">By state</a> · <a href="/about/">About &amp; methodology</a> · <a href="/privacy/">Privacy</a></p>
+</div></footer></body></html>

@@ -2,6 +2,7 @@
 const SYS = window.__SYS__;
 const cpm = (s,p)=>p/(s.btu*s.eff/1e6);
 const $ = id => document.getElementById(id);
+try{const q=parseFloat(new URLSearchParams(location.search).get('load'));if(q>0&&q<2000&&$('load'))$('load').value=q;}catch(e){}
 const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
 function runIndex(){
   const load = parseFloat($('load').value)||0;
