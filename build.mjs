@@ -400,10 +400,17 @@ ${affiliateSlot('Wood heat essentials', [pel, cord])}`;
 }
 
 // ---------- About / Privacy ----------
-write('about/index.html', layout({ title: `About ${SITE_NAME} and Methodology`, desc: 'How the heating cost calculations work.', canonical: '/about/',
+write('about/index.html', layout({ title: `About ${SITE_NAME} and Methodology`, desc: 'How the heating cost calculations work: energy content, efficiency assumptions, data sources and limits.', canonical: '/about/',
   body: `<h1>About &amp; Methodology</h1><p>${SITE_NAME} is a free tool for estimating home heating costs. Delivered heat cost = fuel price ÷ (energy content per unit × efficiency). Energy contents: heating oil 138,500 BTU/gal, propane 91,500 BTU/gal, natural gas 100,000 BTU/therm, kerosene 135,000 BTU/gal, electricity 3,412 BTU/kWh, pellets about 16.5 million BTU/ton, seasoned cordwood about 22 million BTU/cord (varies by species). Efficiencies are typical assumptions and can be changed by choosing different prices or load.</p><p>Default prices for heating oil ($5.26/gal), propane ($2.52/gal), natural gas ($1.30/therm, converted from $13.44 per thousand cubic feet) and electricity (18 cents/kWh, rounded from the 18.23 cent forecast) come from the U.S. Energy Information Administration's Winter Fuels Outlook 2026-27, published October 6, 2026. They are national averages, so your local price will differ. State pages start with each state's average residential electricity price from the EIA Electric Power Monthly, Table 5.6.A (August 2026); oil, propane and natural gas on those pages still use the national averages above. Defaults for kerosene, wood pellets and cordwood are rough estimates, not sourced figures. Replace every default with your own latest price.</p>` }));
-write('privacy/index.html', layout({ title: 'Privacy Policy', desc: 'Privacy policy.', canonical: '/privacy/',
-  body: `<h1>Privacy Policy</h1><p>Calculator inputs stay in your browser and are not sent to us. We may use privacy-friendly analytics and advertising/affiliate partners, which may set cookies. Contact: <!-- ADD EMAIL --></p>` }));
+write('privacy/index.html', layout({ title: 'Privacy Policy', desc: 'How this site handles calculator inputs, cookies, affiliate links and third-party services.', canonical: '/privacy/',
+  body: `<h1>Privacy Policy</h1>
+<p>${SITE_NAME} does not require an account and does not collect personal information. Numbers you type into the calculators are processed in your browser and are not sent to or stored by this site.</p>
+<h2>Affiliate links</h2>
+<p>Some links go to Amazon.com and include our Amazon Associates tracking ID. When you click one, Amazon may set cookies and collect information under its own privacy notice. As an Amazon Associate I earn from qualifying purchases.</p>
+<h2>Hosting, analytics and advertising</h2>
+<p>This site is hosted on GitHub Pages, which may log visitor IP addresses as part of serving pages. We may add analytics or advertising services in the future; if we do, this page will be updated to describe them, and those services may use cookies.</p>
+<h2>Third-party sites</h2>
+<p>Links to other websites are governed by those sites' own policies.</p>` }));
 urls.push('/about/', '/privacy/');
 
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `<url><loc>${SITE_URL}${u}</loc></url>`).join('\n')}\n</urlset>\n`);
