@@ -80,6 +80,10 @@ const layout = ({ title, desc, canonical, body, extraHead = '' }) => `<!doctype 
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${SITE_URL}${canonical}">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website"><meta property="og:site_name" content="${SITE_NAME}">
+<meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${SITE_URL}${canonical}"><meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="/style.css">
 <!-- ANALYTICS: paste Cloudflare Web Analytics / Plausible snippet here -->
 <!-- ADSENSE: paste AdSense script here after approval -->
@@ -191,7 +195,7 @@ write('index.html', layout({
 <table><tr><th>#</th><th>System</th><th>Cost per MMBtu</th><th>Estimated yearly cost</th></tr><tbody id="out"></tbody></table></div>
 ${affiliateSlot('Compare heating options')}
 <h2>Heating costs by state</h2><p><a href="/state/">Start with your state's electricity rate →</a></p>
-<h2>Tools and guides</h2><ul><li><a href="/tools/heat-need/">How much heat does your home use? (from your fuel bills)</a></li><li><a href="/guides/heat-pump-vs-oil-what-decides/">Heat pump vs heating oil: what decides which costs less</a></li><li><a href="/guides/btu-mmbtu-therm-kwh/">BTU, MMBtu, therm and kWh explained</a></li></ul>
+<h2>Tools and guides</h2><ul><li><a href="/tools/heat-need/">How much heat does your home use? (from your fuel bills)</a></li><li><a href="/guides/heat-pump-vs-oil-what-decides/">Heat pump vs heating oil: what decides which costs less</a></li><li><a href="/guides/btu-mmbtu-therm-kwh/">BTU, MMBtu, therm and kWh explained</a></li><li><a href="/guides/propane-vs-heating-oil/">Propane vs heating oil</a></li><li><a href="/guides/wood-pellets-vs-cordwood/">Wood pellets vs cordwood</a></li></ul>
 <h2>Head-to-head comparisons</h2><ul class="links">${allLinks}</ul>
 <script>window.__SYS__=${JSON.stringify(SYSTEMS)};window.__RUN__='index';</script><script src="/calc.js"></script>`,
 }));
@@ -343,9 +347,54 @@ urls.push('/guides/', '/guides/btu-mmbtu-therm-kwh/', '/guides/heat-pump-vs-oil-
 ${affiliateSlot('Before you switch', [hp, oil])}`;
   write('guides/heat-pump-vs-oil-what-decides/index.html', layout({ title: 'Heat Pump vs Heating Oil: What Decides Which Costs Less', desc: 'Break-even electricity prices for heat pumps against heating oil at different oil prices and efficiencies, with what the math leaves out.', canonical: '/guides/heat-pump-vs-oil-what-decides/', body: hpoil }));
 
+  // ---- propane vs oil ----
+  urls.push('/guides/propane-vs-heating-oil/', '/guides/wood-pellets-vs-cordwood/');
+  const bePropRows = oilPrices.map(op => `<tr><td>$${op.toFixed(2)}</td><td>$${(costPerMMBtu(oil, op) * (prop.btu * prop.eff / 1e6)).toFixed(2)}</td><td>$${(costPerMMBtu(oil, op) * (gas.btu * gas.eff / 1e6)).toFixed(2)}</td></tr>`).join('');
+  const propOil = `
+<h1>Propane vs Heating Oil: Which Is Cheaper to Heat With?</h1>
+<p>A gallon of propane holds less energy than a gallon of heating oil, so propane has to sell for noticeably less per gallon to match oil's cost. Comparing the per-gallon price tags alone is the most common mistake.</p>
+<h2>Why the gallon price misleads</h2>
+<p>Heating oil carries about 138,500 BTU per gallon and propane about 91,500, so a gallon of oil has roughly 1.5 times the energy. Modern propane furnaces and boilers are often rated slightly more efficient than oil units (this site assumes 92% vs 85%), which narrows the gap but does not close it. With those assumptions, one gallon of oil delivers about 117,700 BTU of heat and one gallon of propane about 84,200 BTU.</p>
+<h2>Break-even propane price</h2>
+<table><tr><th>Oil price per gallon</th><th>Propane breaks even at (per gallon)</th><th>Natural gas breaks even at (per therm)</th></tr>${bePropRows}</table>
+<p class="mut">Prices at which each fuel costs the same per unit of delivered heat as oil, assuming 85% oil, 92% propane and 92% natural gas efficiency. Propane or gas priced below the figure in your row is cheaper to run than oil.</p>
+<h2>Other things that change the answer</h2>
+<ul><li><b>Equipment:</b> switching fuels means new equipment, a tank, and installation. Running-cost savings have to pay that back.</li>
+<li><b>Price volatility and contracts:</b> propane and oil dealers often offer fixed-price or capped-price programs; compare the program price, not the market price.</li>
+<li><b>Tank ownership and fees:</b> rental fees, delivery minimums and hazmat or service charges can add real cost.</li>
+<li><b>Natural gas availability:</b> where a gas main is available, it is usually far cheaper per unit of heat than either (see the table above), so check before converting between delivered fuels.</li></ul>
+<p>Plug in your own prices on the <a href="/compare/${pairSlug(oil, prop)}/">heating oil vs propane calculator</a>, or find your home's heat need with <a href="/tools/heat-need/">the heat-need tool</a>.</p>
+${affiliateSlot('Fuel tank and safety gear', [oil, prop])}`;
+  write('guides/propane-vs-heating-oil/index.html', layout({ title: 'Propane vs Heating Oil: Which Is Cheaper to Heat With?', desc: 'Why per-gallon prices mislead, with break-even propane and gas prices at several heating oil prices.', canonical: '/guides/propane-vs-heating-oil/', body: propOil }));
+
+  // ---- pellets vs cordwood ----
+  const pel = byId('wood-pellets'), cord = byId('cordwood');
+  const galOilEq = s => (s.btu * s.eff / (oil.btu * oil.eff)).toFixed(0);
+  const pelRows = [250, 330, 400].map(p => `<tr><td>Pellets $${p}/ton</td><td>$${costPerMMBtu(pel, p).toFixed(2)}</td></tr>`).join('');
+  const cordRows = [200, 300, 400].map(p => `<tr><td>Cordwood $${p}/cord</td><td>$${costPerMMBtu(cord, p).toFixed(2)}</td></tr>`).join('');
+  const woody = `
+<h1>Wood Pellets vs Cordwood: Cost Per Unit of Heat</h1>
+<p>Both are renewable fuels that often undercut oil and propane on price, but they differ a lot in effort, storage and consistency. Cost per MMBtu puts them on the same scale as every other fuel on this site.</p>
+<h2>How much heat is in a ton or a cord?</h2>
+<p>At the assumptions used here (about 16.5 million BTU per ton of pellets at 80% stove efficiency, and about 22 million BTU per cord of seasoned hardwood at 65% efficiency), one ton of pellets delivers about as much heat as ${galOilEq(pel)} gallons of heating oil in an 85% boiler, and one cord delivers about as much as ${galOilEq(cord)} gallons. Actual cordwood energy varies by species and moisture, and stove efficiency varies by model and how it is run.</p>
+<h2>Cost per MMBtu at example prices</h2>
+<table><tr><th>Fuel and price</th><th>Cost per MMBtu delivered</th></tr>${pelRows}${cordRows}</table>
+<p class="mut">These prices are rough examples, not quotes; wood fuel prices vary widely by region and season. Compare with oil at $${costPerMMBtu(oil, oil.price).toFixed(2)} and propane at $${costPerMMBtu(prop, prop.price).toFixed(2)} per MMBtu at the EIA national winter averages.</p>
+<h2>What the numbers don't capture</h2>
+<ul><li><b>Labor:</b> pellet stoves are fed from bags or a hopper; cordwood means stacking, hauling and tending a fire. If you cut and split your own wood, the cash cost can fall far below the table but the time cost rises.</li>
+<li><b>Moisture:</b> wood that is not well seasoned (commonly aimed at under about 20% moisture) delivers less heat and creates more creosote. A moisture meter is inexpensive and worth using.</li>
+<li><b>Storage:</b> a cord takes roughly 128 cubic feet of stacked space; pellets are bagged and need to stay dry.</li>
+<li><b>Electricity and maintenance:</b> pellet stoves use a small amount of electricity for feed and fans and need regular cleaning; wood stoves and chimneys need annual inspection and sweeping.</li>
+<li><b>Safety and rules:</b> install and vent solid-fuel appliances to code, use working smoke and carbon monoxide detectors, and check local wood-burning restrictions.</li></ul>
+<p>Compare directly with other fuels on the <a href="/compare/${pairSlug(pel, cord)}/">pellets vs cordwood calculator</a>.</p>
+${affiliateSlot('Wood heat essentials', [pel, cord])}`;
+  write('guides/wood-pellets-vs-cordwood/index.html', layout({ title: 'Wood Pellets vs Cordwood: Cost Per Unit of Heat', desc: 'Compare wood pellets and cordwood by delivered heat cost, oil-equivalent gallons, labor, moisture and storage.', canonical: '/guides/wood-pellets-vs-cordwood/', body: woody }));
+
   write('guides/index.html', layout({ title: 'Home Heating Guides', desc: 'Guides to heating units, efficiency and heat pump vs oil economics.', canonical: '/guides/',
     body: `<h1>Home Heating Guides</h1><ul>
 <li><a href="/guides/btu-mmbtu-therm-kwh/">BTU, MMBtu, therm and kWh: the units behind heating costs</a></li>
+<li><a href="/guides/propane-vs-heating-oil/">Propane vs heating oil: which is cheaper to heat with?</a></li>
+<li><a href="/guides/wood-pellets-vs-cordwood/">Wood pellets vs cordwood: cost per unit of heat</a></li>
 <li><a href="/guides/heat-pump-vs-oil-what-decides/">Heat pump vs heating oil: what decides which costs less</a></li>
 <li><a href="/tools/heat-need/">Tool: how much heat does your home use?</a></li></ul>` }));
 }
@@ -358,5 +407,8 @@ write('privacy/index.html', layout({ title: 'Privacy Policy', desc: 'Privacy pol
 urls.push('/about/', '/privacy/');
 
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `<url><loc>${SITE_URL}${u}</loc></url>`).join('\n')}\n</urlset>\n`);
+write('404.html', layout({ title: 'Page not found', desc: 'Page not found.', canonical: '/404.html',
+  body: `<h1>Page not found</h1><p>That page doesn't exist. Try the <a href="/">heating cost calculator</a>, <a href="/state/">your state</a>, or the <a href="/guides/">guides</a>.</p>` }));
+write('.nojekyll', '');
 write('_headers', `/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n`);
 console.log(`Built ${urls.length} pages (${pairs.length} comparisons) into ${OUT}`);
