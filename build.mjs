@@ -189,13 +189,78 @@ write('index.html', layout({
 <div><label for="load">Annual heat needed (MMBtu delivered)</label><input id="load" type="number" value="${DEFAULT_LOAD}"></div></div>
 <table><tr><th>#</th><th>System</th><th>Cost per MMBtu</th><th>Estimated yearly cost</th></tr><tbody id="out"></tbody></table></div>
 ${affiliateSlot('Compare heating options')}
+<h2>Heating costs by state</h2><p><a href="/state/">Start with your state's electricity rate →</a></p>
 <h2>Head-to-head comparisons</h2><ul class="links">${allLinks}</ul>
 <script>window.__SYS__=${JSON.stringify(SYSTEMS)};window.__RUN__='index';</script><script src="/calc.js"></script>`,
 }));
 
+// ---------- State pages ----------
+// Residential electricity, cents/kWh, EIA Electric Power Monthly Table 5.6.A, August 2026.
+const ELEC = {
+  'Hawaii':47.18,'Maine':32.11,'Massachusetts':30.48,'California':29.75,'Alaska':29.41,'New York':28.65,'Rhode Island':28.18,
+  'New Hampshire':27.64,'District of Columbia':25.98,'New Jersey':24.61,'Connecticut':24.51,'Vermont':23.84,'Michigan':22.99,
+  'Pennsylvania':21.77,'Maryland':21.4,'Wisconsin':19.41,'Ohio':19.38,'Illinois':19.32,'Delaware':18.7,'Virginia':17.64,
+  'Minnesota':17.2,'Colorado':17.17,'Iowa':17.06,'Indiana':17.02,'New Mexico':16.51,'Alabama':16.33,'West Virginia':16.31,
+  'Missouri':16.02,'Oregon':15.92,'Texas':15.91,'Georgia':15.9,'South Carolina':15.76,'Montana':15.57,'Kansas':15.47,
+  'South Dakota':15.15,'Arizona':15.05,'Florida':14.99,'North Carolina':14.95,'Oklahoma':14.82,'Washington':14.63,
+  'Mississippi':14.43,'Wyoming':14.43,'Arkansas':14.37,'Kentucky':13.8,'Nebraska':13.54,'Tennessee':13.42,'Idaho':13.37,
+  'North Dakota':13.31,'Utah':13.31,'Louisiana':12.87,'Nevada':12.72,
+};
+const EXCLUDE = new Set(['Hawaii', 'Florida']); // negligible home heating demand; skip thin pages
+const ranked = Object.entries(ELEC).sort((x, y) => y[1] - x[1]).map(e => e[0]);
+const slugOf = n => n.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
+const pairSlug = (x, y) => { const i = SYSTEMS.indexOf(x), j = SYSTEMS.indexOf(y); return i < j ? `${x.id}-vs-${y.id}` : `${y.id}-vs-${x.id}`; };
+const byId = id => SYSTEMS.find(s => s.id === id);
+const stateNames = Object.keys(ELEC).filter(n => !EXCLUDE.has(n)).sort();
+const hp = byId('heat-pump'), oil = byId('heating-oil'), prop = byId('propane'), gas = byId('natural-gas'), res = byId('electric');
+urls.push('/state/');
+
+for (const name of stateNames) {
+  const cents = ELEC[name], kwh = cents / 100, rank = ranked.indexOf(name) + 1;
+  const slug = slugOf(name), canonical = `/state/${slug}/`;
+  urls.push(canonical);
+  const sys = SYSTEMS.map(s => (s.unit === 'kWh' ? { ...s, price: kwh } : s));
+  const costs = sys.map(s => ({ s, a: costPerMMBtu(s, s.price) * DEFAULT_LOAD })).sort((x, y) => x.a - y.a);
+  const get = id => costs.find(c => c.s.id === id).a;
+  const beOil = costPerMMBtu(oil, oil.price) * (hp.btu * hp.eff / 1e6);   // $/kWh where heat pump = oil
+  const beProp = costPerMMBtu(prop, prop.price) * (hp.btu * hp.eff / 1e6);
+  const beGas = costPerMMBtu(gas, gas.price) * (hp.btu * hp.eff / 1e6);
+  const hpVs = (id, be) => `${esc(name)}'s ${cents.toFixed(2)} cents/kWh residential rate is ${kwh <= be ? 'below' : 'above'} the ${(be * 100).toFixed(1)} cents/kWh break-even against ${esc(byId(id).short.toLowerCase())} at default prices, so a heat pump ${kwh <= be ? 'costs less to run' : 'costs more to run'} in this comparison.`;
+  const title = `Home Heating Costs in ${name}: Heat Pump vs Oil, Propane, Gas, Electric`;
+  const desc = `Estimate yearly heating cost in ${name} using the state's ${cents.toFixed(2)}¢/kWh electricity rate. Compare heat pump, oil, propane, natural gas and more.`;
+  const inputs2 = sys.map(s => `<div><label for="p-${s.id}">${esc(s.name)} ($ per ${s.unit})</label><input id="p-${s.id}" type="number" step="0.01" value="${s.unit === 'kWh' ? kwh.toFixed(4) : s.price}"></div>`).join('');
+  const pairLinks = [[hp, oil], [hp, prop], [hp, gas], [hp, res], [oil, prop], [oil, gas]]
+    .map(([x, y]) => `<li><a href="/compare/${pairSlug(x, y)}/">${esc(x.short)} vs ${esc(y.short)}</a></li>`).join('');
+  const body = `
+<h1>Home Heating Costs in ${esc(name)}</h1>
+<p>${esc(name)} residential electricity averaged <b>${cents.toFixed(2)} cents per kWh</b> in August 2026 (EIA), which ranks ${rank} of ${ranked.length} among states and DC from highest to lowest. Electricity price is the biggest state-by-state difference for heat pumps and electric heat, so the calculator below starts with ${esc(name)}'s rate for those two systems and U.S. average winter 2026-27 forecasts for oil, propane and natural gas. Replace any price with your own.</p>
+<div class="card"><div class="grid">${inputs2}
+<div><label for="load">Annual heat needed (MMBtu delivered)</label><input id="load" type="number" value="${DEFAULT_LOAD}"></div></div>
+<table><tr><th>#</th><th>System</th><th>Cost per MMBtu</th><th>Estimated yearly cost</th></tr><tbody id="out"></tbody></table></div>
+${affiliateSlot(`Heating a home in ${name}?`, [hp, oil])}
+<h2>${esc(name)} at default prices</h2>
+<ul>
+<li>Heat pump: about ${money(get('heat-pump'))} per year; electric resistance: about ${money(get('electric'))} per year.</li>
+<li>Heating oil: about ${money(get('heating-oil'))}; propane: about ${money(get('propane'))}; natural gas: about ${money(get('natural-gas'))}.</li>
+<li>${hpVs('heating-oil', beOil)}</li>
+<li>${hpVs('propane', beProp)}</li>
+<li>${hpVs('natural-gas', beGas)}</li>
+</ul>
+<p class="mut">These use the default ${DEFAULT_LOAD} MMBtu of annual heat. Colder climates and larger or leakier homes need more, which scales every cost up proportionally and widens the gaps between systems. Local gas, oil and propane prices in ${esc(name)} may differ from the national averages used here.</p>
+<h2>Related comparisons</h2><ul class="links">${pairLinks}</ul>
+<p><a href="/state/">All states</a> · <a href="/">All systems ranked</a></p>
+<script>window.__SYS__=${JSON.stringify(sys)};window.__RUN__='index';</script><script src="/calc.js"></script>`;
+  write(`state/${slug}/index.html`, layout({ title, desc, canonical, body }));
+}
+write('state/index.html', layout({
+  title: 'Home Heating Costs by State', desc: 'State-by-state home heating cost calculators using local electricity rates.', canonical: '/state/',
+  body: `<h1>Home Heating Costs by State</h1><p>Pick your state to start the calculator with its residential electricity rate (EIA, August 2026).</p>
+<ul class="links">${stateNames.map(n => `<li><a href="/state/${slugOf(n)}/">${esc(n)}</a> (${ELEC[n].toFixed(2)}¢/kWh)</li>`).join('')}</ul>`,
+}));
+
 // ---------- About / Privacy ----------
 write('about/index.html', layout({ title: `About ${SITE_NAME} and Methodology`, desc: 'How the heating cost calculations work.', canonical: '/about/',
-  body: `<h1>About &amp; Methodology</h1><p>${SITE_NAME} is a free tool for estimating home heating costs. Delivered heat cost = fuel price ÷ (energy content per unit × efficiency). Energy contents: heating oil 138,500 BTU/gal, propane 91,500 BTU/gal, natural gas 100,000 BTU/therm, kerosene 135,000 BTU/gal, electricity 3,412 BTU/kWh, pellets about 16.5 million BTU/ton, seasoned cordwood about 22 million BTU/cord (varies by species). Efficiencies are typical assumptions and can be changed by choosing different prices or load.</p><p>Default prices for heating oil ($5.26/gal), propane ($2.52/gal), natural gas ($1.30/therm, converted from $13.44 per thousand cubic feet) and electricity (18 cents/kWh, rounded from the 18.23 cent forecast) come from the U.S. Energy Information Administration's Winter Fuels Outlook 2026-27, published October 6, 2026. They are national averages, so your local price will differ. Defaults for kerosene, wood pellets and cordwood are rough estimates, not sourced figures. Replace every default with your own latest price.</p>` }));
+  body: `<h1>About &amp; Methodology</h1><p>${SITE_NAME} is a free tool for estimating home heating costs. Delivered heat cost = fuel price ÷ (energy content per unit × efficiency). Energy contents: heating oil 138,500 BTU/gal, propane 91,500 BTU/gal, natural gas 100,000 BTU/therm, kerosene 135,000 BTU/gal, electricity 3,412 BTU/kWh, pellets about 16.5 million BTU/ton, seasoned cordwood about 22 million BTU/cord (varies by species). Efficiencies are typical assumptions and can be changed by choosing different prices or load.</p><p>Default prices for heating oil ($5.26/gal), propane ($2.52/gal), natural gas ($1.30/therm, converted from $13.44 per thousand cubic feet) and electricity (18 cents/kWh, rounded from the 18.23 cent forecast) come from the U.S. Energy Information Administration's Winter Fuels Outlook 2026-27, published October 6, 2026. They are national averages, so your local price will differ. State pages start with each state's average residential electricity price from the EIA Electric Power Monthly, Table 5.6.A (August 2026); oil, propane and natural gas on those pages still use the national averages above. Defaults for kerosene, wood pellets and cordwood are rough estimates, not sourced figures. Replace every default with your own latest price.</p>` }));
 write('privacy/index.html', layout({ title: 'Privacy Policy', desc: 'Privacy policy.', canonical: '/privacy/',
   body: `<h1>Privacy Policy</h1><p>Calculator inputs stay in your browser and are not sent to us. We may use privacy-friendly analytics and advertising/affiliate partners, which may set cookies. Contact: <!-- ADD EMAIL --></p>` }));
 urls.push('/about/', '/privacy/');
