@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://bdthorndike-create.github.io/sitemap.xml
+Sitemap: https://heatcostcalc.netlify.app/sitemap.xml

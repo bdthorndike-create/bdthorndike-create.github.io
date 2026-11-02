@@ -411,7 +411,7 @@ write('privacy/index.html', layout({ title: 'Privacy Policy', desc: 'How this si
 <h2>Analytics</h2>
 <p>We use Google Analytics to understand which pages are useful. It may set cookies and collect anonymized usage data such as pages viewed, approximate location and device type. You can opt out with the Google Analytics opt-out browser add-on or by blocking cookies in your browser.</p>
 <h2>Hosting and advertising</h2>
-<p>This site is hosted on GitHub Pages, which may log visitor IP addresses as part of serving pages. We may add advertising services in the future; if we do, this page will be updated to describe them, and those services may use cookies.</p>
+<p>This site is hosted on Netlify, which may log visitor IP addresses as part of serving pages. We may add advertising services in the future; if we do, this page will be updated to describe them, and those services may use cookies.</p>
 <h2>Third-party sites</h2>
 <p>Links to other websites are governed by those sites' own policies.</p>` }));
 urls.push('/about/', '/privacy/');

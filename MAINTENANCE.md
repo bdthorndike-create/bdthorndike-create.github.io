@@ -1,12 +1,12 @@
 # HeatCostCalc maintenance runbook
 
-Site: https://bdthorndike-create.github.io (GitHub Pages, repo `bdthorndike-create/bdthorndike-create.github.io`)
+Site: https://heatcostcalc.netlify.app (Netlify project `heatcostcalc`, auto-deploys from repo `bdthorndike-create/bdthorndike-create.github.io`). The GitHub Pages copy at https://bdthorndike-create.github.io serves the same files with canonicals pointing to the Netlify address.
 Generator: `build.mjs` (Node, no dependencies). Output goes to `dist/`, which is copied to the repo root.
 
 ## Rebuild and publish
-1. `SITE_URL=https://bdthorndike-create.github.io node build.mjs`
+1. `SITE_URL=https://heatcostcalc.netlify.app node build.mjs`
 2. Copy everything in `dist/` over the repo root (keep `google8d15034ae41a2d04.html`, which verifies Search Console).
-3. Commit and push to `main`. Pages redeploys in 1-2 minutes.
+3. Commit and push to `main`. Netlify redeploys in 1-2 minutes.
 
 ## Refresh data (about monthly in winter)
 | What | Where in build.mjs | Source |
@@ -24,6 +24,6 @@ After changing numbers, also re-check the worked examples in the guides (they ar
 - Hand-check one calculation: cost per MMBtu = price / (BTU per unit x efficiency / 1,000,000).
 
 ## Accounts (owner only)
-- Google Search Console: sitemap at /sitemap.xml
+- Google Search Console: property for https://heatcostcalc.netlify.app, sitemap at /sitemap.xml
 - Amazon Associates: tag `earthazoid-20`; the site must be listed under Manage Your Websites. Needs 3 qualifying sales in 180 days to keep a new account open.
 - AdSense: apply once there is steady traffic; paste the script where `build.mjs` has the `ADSENSE` comment.
