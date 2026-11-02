@@ -85,7 +85,8 @@ const layout = ({ title, desc, canonical, body, extraHead = '' }) => `<!doctype 
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${SITE_URL}${canonical}"><meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="/style.css">
-<!-- ANALYTICS: paste Cloudflare Web Analytics / Plausible snippet here -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-VD6P0Z7NSE"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-VD6P0Z7NSE");</script>
 <!-- ADSENSE: paste AdSense script here after approval -->
 ${extraHead}
 </head><body>
@@ -407,8 +408,10 @@ write('privacy/index.html', layout({ title: 'Privacy Policy', desc: 'How this si
 <p>${SITE_NAME} does not require an account and does not collect personal information. Numbers you type into the calculators are processed in your browser and are not sent to or stored by this site.</p>
 <h2>Affiliate links</h2>
 <p>Some links go to Amazon.com and include our Amazon Associates tracking ID. When you click one, Amazon may set cookies and collect information under its own privacy notice. As an Amazon Associate I earn from qualifying purchases.</p>
-<h2>Hosting, analytics and advertising</h2>
-<p>This site is hosted on GitHub Pages, which may log visitor IP addresses as part of serving pages. We may add analytics or advertising services in the future; if we do, this page will be updated to describe them, and those services may use cookies.</p>
+<h2>Analytics</h2>
+<p>We use Google Analytics to understand which pages are useful. It may set cookies and collect anonymized usage data such as pages viewed, approximate location and device type. You can opt out with the Google Analytics opt-out browser add-on or by blocking cookies in your browser.</p>
+<h2>Hosting and advertising</h2>
+<p>This site is hosted on GitHub Pages, which may log visitor IP addresses as part of serving pages. We may add advertising services in the future; if we do, this page will be updated to describe them, and those services may use cookies.</p>
 <h2>Third-party sites</h2>
 <p>Links to other websites are governed by those sites' own policies.</p>` }));
 urls.push('/about/', '/privacy/');
