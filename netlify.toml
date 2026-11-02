@@ -1,0 +1,3 @@
+# Static site: no build step. Files at the repo root are published as-is.
+[build]
+  publish = "."
