@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RateFloor: Freelance Hourly Rate Calculator</title>
+<link rel="canonical" href="https://bdthorndike-create.github.io/ratefloor/">
+<meta property="og:title" content="RateFloor: Freelance Hourly Rate Calculator">
+<meta property="og:description" content="Work backward from the take-home pay you want to the minimum rate you should charge.">
+<meta property="og:url" content="https://bdthorndike-create.github.io/ratefloor/">
+<meta property="og:type" content="website">
+<meta name="description" content="Work backward from the take-home pay you want to the minimum hourly, daily and project rate you should charge as a freelancer.">
+<style>
+:root{--bg:#faf8f4;--card:#fff;--ink:#1f1b16;--mute:#6b6458;--acc:#b4531a;--line:#e6dfd2}
+@media(prefers-color-scheme:dark){:root{--bg:#171410;--card:#201c17;--ink:#f1ebe0;--mute:#a79d8c;--acc:#f0985c;--line:#342e26}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 Georgia,'Times New Roman',serif;background:var(--bg);color:var(--ink)}
+main{max-width:880px;margin:0 auto;padding:28px 16px 56px}
+h1{font-size:2rem;margin:0 0 4px;letter-spacing:-.5px}
+.sub{color:var(--mute);margin:0 0 22px}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+h2{font:600 .8rem system-ui,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:18px 0 6px}
+h2:first-child{margin-top:0}
+label{display:block;font:.9rem system-ui,sans-serif;color:var(--mute);margin-top:10px}
+input{width:100%;padding:9px 10px;margin-top:4px;font:1rem system-ui,sans-serif;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.hero{font-size:3rem;font-weight:700;color:var(--acc);line-height:1.1}
+.row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-family:system-ui,sans-serif;font-size:.95rem}
+.row:last-child{border:0}
+.note{color:var(--mute);font:.8rem system-ui,sans-serif;margin-top:16px}
+</style>
+</head>
+<body>
+<main>
+<h1>RateFloor</h1>
+<p class="sub">The lowest rate that still gets you the income you want. Everything stays in your browser.</p>
+<div class="grid">
+<section class="card">
+<h2>Income goal</h2>
+<label>Take-home pay you want per year ($)<input id="net" type="number" value="70000" step="1000"></label>
+<label>Estimated tax rate (income + self-employment, %)<input id="tax" type="number" value="28" step="1"></label>
+<h2>Yearly business costs</h2>
+<label>Health insurance ($ per year)<input id="health" type="number" value="6000" step="100"></label>
+<label>Software, equipment, other costs ($ per year)<input id="costs" type="number" value="3000" step="100"></label>
+<label>Retirement savings ($ per year)<input id="ret" type="number" value="5000" step="500"></label>
+<h2>Time</h2>
+<label>Weeks off per year (vacation, holidays, sick)<input id="off" type="number" value="6" step="1"></label>
+<label>Working hours per week<input id="hrs" type="number" value="40" step="1"></label>
+<label>Share of work hours you can bill (%)<input id="bill" type="number" value="60" step="1"></label>
+<label>Profit buffer for slow periods (%)<input id="buf" type="number" value="10" step="1"></label>
+</section>
+<section class="card" aria-live="polite">
+<h2>Minimum hourly rate</h2>
+<div class="hero" id="rate">–</div>
+<div style="height:14px"></div>
+<div class="row"><span>Day rate (8 billable hrs)</span><b id="day">–</b></div>
+<div class="row"><span>Weekly (at your billable share)</span><b id="wk">–</b></div>
+<div class="row"><span>Revenue needed per year</span><b id="rev">–</b></div>
+<div class="row"><span>Billable hours per year</span><b id="bh">–</b></div>
+<div class="row"><span>Project: 40 hours, quoted</span><b id="proj">–</b></div>
+<p class="note" id="msg"></p>
+<button id="share" type="button" style="margin-top:12px;padding:9px 14px;font:.9rem system-ui,sans-serif;border:1px solid var(--acc);color:var(--acc);background:transparent;border-radius:6px;cursor:pointer">Copy link to these numbers</button>
+</section>
+</div>
+<p class="note">Estimates, not tax or financial advice. Tax rates vary; ask an accountant for yours. Formula: (take-home ÷ (1 − tax) + costs + insurance + retirement) × (1 + buffer) ÷ billable hours.</p>
+<p class="note"><a href="privacy.html" style="color:var(--acc)">Privacy</a></p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const m=n=>"$"+Math.round(n).toLocaleString();
+function calc(){
+  const v=id=>+$(id).value;
+  const tax=v("tax")/100;
+  if(tax>=1||tax<0||v("bill")<=0||v("hrs")<=0||v("off")>=52){$("msg").textContent="Check your inputs.";return}
+  const gross=v("net")/(1-tax);
+  const rev=(gross+v("health")+v("costs")+v("ret"))*(1+v("buf")/100);
+  const bh=(52-v("off"))*v("hrs")*(v("bill")/100);
+  const rate=rev/bh;
+  $("rate").textContent=m(rate)+"/hr";
+  $("day").textContent=m(rate*8);
+  $("wk").textContent=m(rate*v("hrs")*v("bill")/100);
+  $("rev").textContent=m(rev);
+  $("bh").textContent=Math.round(bh).toLocaleString();
+  $("proj").textContent=m(rate*40);
+  $("msg").textContent="Billing "+Math.round(v("bill"))+"% of "+v("hrs")+" hrs a week means unbilled admin, sales and gaps are priced into your rate.";
+}
+const ids=["net","tax","health","costs","ret","off","hrs","bill","buf"];
+function save(){try{history.replaceState(null,"","#"+ids.map(i=>$(i).value).join(","))}catch(e){}}
+function load(){const p=location.hash.slice(1).split(",");if(p.length===ids.length&&p.every(x=>x!==""&&isFinite(+x)))ids.forEach((i,k)=>$(i).value=p[k])}
+$("share").addEventListener("click",async()=>{save();try{await navigator.clipboard.writeText(location.href);$("share").textContent="Link copied"}catch(e){$("share").textContent="Copy the address bar link"}setTimeout(()=>$("share").textContent="Copy link to these numbers",2500)});
+document.querySelectorAll("input").forEach(e=>e.addEventListener("input",()=>{calc();save()}));
+load();calc();
+</script>
+</body>
+</html>
