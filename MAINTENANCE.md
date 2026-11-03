@@ -5,7 +5,7 @@ Generator: `build.mjs` (Node, no dependencies). Output goes to `dist/`, which is
 
 ## Rebuild and publish
 1. `SITE_URL=https://heatcostcalc.netlify.app node build.mjs`
-2. Copy everything in `dist/` over the repo root (keep `google8d15034ae41a2d04.html`, which verifies Search Console).
+2. Copy everything in `dist/` over the repo root (keep `google8d15034ae41a2d04.html`, which verifies Search Console, and the static `apple-touch-icon.png` and `og-image.png`).
 3. Commit and push to `main`. Netlify redeploys in 1-2 minutes.
 
 ## Refresh data (about monthly in winter)
@@ -26,4 +26,5 @@ After changing numbers, also re-check the worked examples in the guides (they ar
 ## Accounts (owner only)
 - Google Search Console: property for https://heatcostcalc.netlify.app, sitemap at /sitemap.xml
 - Amazon Associates: tag `earthazoid-20`; the site must be listed under Manage Your Websites. Needs 3 qualifying sales in 180 days to keep a new account open.
-- AdSense: apply once there is steady traffic; paste the script where `build.mjs` has the `ADSENSE` comment.
+- AdSense: publisher `ca-pub-1399340452541176`. The verification meta tag and script are in the `layout()` head in `build.mjs`, and `ads.txt` is generated. After approval, enable Auto ads in the AdSense console; no code change is needed.
+- Contact form: Netlify Forms (form name `contact`); submissions appear in the Netlify project under Forms.

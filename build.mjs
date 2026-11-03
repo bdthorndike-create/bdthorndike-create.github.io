@@ -27,21 +27,89 @@ const costPerMMBtu = (s, price) => price / (s.btu * s.eff / 1e6);
 const money = n => '$' + Math.round(n).toLocaleString('en-US');
 
 const CSS = `
-:root{--bg:#fafaf7;--fg:#1d2330;--mut:#5b6475;--acc:#c2410c;--card:#fff;--bd:#e4e2da}
-@media(prefers-color-scheme:dark){:root{--bg:#14171d;--fg:#eceae4;--mut:#9aa3b2;--acc:#fb923c;--card:#1c2028;--bd:#2c313b}}
-*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,sans-serif;background:var(--bg);color:var(--fg)}
-.w{max-width:860px;margin:0 auto;padding:0 16px}
-header{border-bottom:1px solid var(--bd);padding:14px 0}header a{color:var(--fg);font-weight:700;text-decoration:none}
-h1{font-size:1.8rem;line-height:1.2;margin:1.2rem 0 .5rem}h2{margin-top:2rem}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px;margin:16px 0}
-label{display:block;font-size:.85rem;color:var(--mut);margin:8px 0 2px}
-input{width:100%;padding:8px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--fg);font:inherit}
-.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--bd)}
-.big{font-size:1.5rem;font-weight:700;color:var(--acc)}.mut{color:var(--mut);font-size:.9rem}
-.aff{border:1px dashed var(--bd);border-radius:10px;padding:12px;margin:16px 0}
-a{color:var(--acc)}footer{border-top:1px solid var(--bd);margin-top:3rem;padding:20px 0;color:var(--mut);font-size:.85rem}
-ul.links{columns:2;padding-left:18px}@media(max-width:560px){ul.links{columns:1}}
+:root{--brand:#0e6b50;--on-brand:#fff;--link:#0e6b50;--soft:#e3f3ec}
+@media(prefers-color-scheme:dark){:root{--brand:#3fbf98;--on-brand:#06120d;--link:#5fd3b0;--soft:#12302a}}
+:root{--serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--paper:#fff;--wash:#f4f6f8;--ink:#14202b;--mut:#52606d;--rule:#d8dee4;--card:#fff}
+@media(prefers-color-scheme:dark){:root{--paper:#0f151b;--wash:#151d25;--ink:#e9eef2;--mut:#9aa8b5;--rule:#27333e;--card:#18212a}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--sans)}
+.w{max-width:1040px;margin:0 auto;padding:0 20px}
+a{color:var(--link);text-underline-offset:.16em}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:4px}
+.skip{position:absolute;left:-9999px;top:8px}.skip:focus{left:12px;background:var(--ink);color:var(--paper);padding:8px 12px;z-index:9;border-radius:8px}
+header.top{background:var(--paper);border-bottom:1px solid var(--rule)}
+header.top .w{display:flex;align-items:center;justify-content:space-between;gap:6px 20px;flex-wrap:wrap;min-height:68px}
+.brand{display:flex;align-items:center;gap:11px;color:var(--ink);text-decoration:none;font:700 1.32rem/1 var(--serif);letter-spacing:-.01em;padding:10px 0}
+.brand svg{width:36px;height:36px;flex:none;display:block}
+nav.main{display:flex;gap:2px;flex-wrap:wrap}
+nav.main a{padding:9px 11px;border-radius:8px;color:var(--mut);text-decoration:none;font-weight:500;font-size:.95rem}
+nav.main a:hover{background:var(--wash);color:var(--ink)}
+nav.main a[aria-current=page]{color:var(--ink);box-shadow:inset 0 -3px 0 var(--brand);border-radius:0}
+@media(max-width:640px){header.top .w{padding-bottom:6px}nav.main{width:100%;margin:0 -8px}nav.main a{padding:8px 9px;font-size:.92rem}}
+.band{background:radial-gradient(70% 150% at 100% 0%,var(--soft),transparent 64%),var(--wash);border-bottom:1px solid var(--rule)}
+.band .w{padding-top:38px;padding-bottom:34px}
+.crumbs{font-size:.85rem;color:var(--mut);margin:0 0 12px}.crumbs a{color:var(--mut)}
+.band h1{font:700 clamp(1.85rem,4.6vw,2.9rem)/1.12 var(--serif);letter-spacing:-.015em;margin:0 0 14px;max-width:24ch}
+.band.wide h1{max-width:30ch}
+.band .lead{font:400 1.14rem/1.62 var(--serif);color:var(--mut);margin:0;max-width:64ch}
+.trust{display:flex;flex-wrap:wrap;gap:8px 22px;margin:20px 0 0;padding:0;list-style:none;font-size:.92rem;font-weight:500}
+.trust li{display:flex;align-items:center;gap:8px}
+.trust li::before{content:"";width:18px;height:18px;border-radius:50%;background:var(--brand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M5 9.3l2.6 2.6L13 6.4' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat;flex:none}
+main{padding:12px 0 48px}
+main h2{font:650 1.55rem/1.25 var(--serif);margin:2.3rem 0 .5rem;letter-spacing:-.005em}
+main h3{font:650 1.15rem/1.3 var(--serif);margin:1.7rem 0 .2rem}
+main p,main li{font:400 1.0625rem/1.74 var(--serif)}
+main p{margin:.85em 0;max-width:68ch}
+main ul,main ol{max-width:68ch;padding-left:1.3em}main li{margin:.3em 0}
+.card,.aff,.panel{font-family:var(--sans)}
+.card p,.card li,.aff p,.aff li,td,th,label,.mut,.note,.d{font-family:var(--sans)}
+.mut{color:var(--mut);font-size:.9rem;line-height:1.55}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:24px;margin:26px 0;box-shadow:0 1px 2px rgba(20,32,43,.05),0 14px 32px -18px rgba(20,32,43,.22)}
+label{display:block;font:500 .86rem/1.35 var(--sans);color:var(--mut);margin:0 0 6px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--rule);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit;font-size:1rem;min-height:44px}
+textarea{min-height:150px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);outline:3px solid color-mix(in srgb,var(--brand) 30%,transparent);outline-offset:0}
+.grid{display:grid;gap:18px 20px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.97rem}
+th{font:600 .82rem/1.3 var(--sans);color:var(--mut);text-align:left;padding:10px;border-bottom:2px solid var(--rule)}
+td{padding:12px 10px;border-bottom:1px solid var(--rule);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+@media(max-width:640px){main table{display:block;overflow-x:auto;max-width:100%}}
+.big{font:700 1.9rem/1.1 var(--serif);color:var(--link);font-variant-numeric:tabular-nums}
+#out tr:first-child td{background:var(--soft);font-weight:600}
+#out tr:first-child td:first-child{box-shadow:inset 4px 0 0 var(--brand)}
+.btn{display:inline-flex;align-items:center;justify-content:center;background:var(--brand);color:var(--on-brand);padding:12px 22px;border-radius:10px;font:600 1rem var(--sans);text-decoration:none;border:0;cursor:pointer;min-height:46px}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--link);border:1.5px solid var(--brand)}
+.aff{background:var(--wash);border:1px solid var(--rule);border-left:4px solid var(--brand);border-radius:12px;padding:18px 20px;margin:28px 0}
+.aff b{font:700 1.08rem var(--serif)}
+.aff ul{list-style:none;padding:0;margin:12px 0;display:flex;flex-wrap:wrap;gap:8px;max-width:none}
+.aff li{margin:0}
+.aff li a{display:inline-block;padding:8px 13px;border:1px solid var(--rule);border-radius:999px;background:var(--paper);color:var(--ink);text-decoration:none;font:500 .92rem var(--sans)}
+.aff li a:hover{border-color:var(--brand)}
+ul.links{columns:2;column-gap:32px;list-style:none;padding:0;max-width:none}ul.links li{break-inside:avoid;margin:.35em 0}
+@media(max-width:560px){ul.links{columns:1}}
+.cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));padding:0;list-style:none;max-width:none;margin:18px 0}
+.cards li{margin:0;font-family:var(--sans)}
+.cards a{display:block;height:100%;padding:20px;border:1px solid var(--rule);border-radius:14px;color:var(--ink);text-decoration:none;background:var(--card);box-shadow:inset 0 3px 0 var(--brand)}
+.cards a:hover{border-color:var(--brand)}
+.cards strong{display:block;font:650 1.08rem/1.3 var(--serif);margin-bottom:6px}
+.cards span{display:block;color:var(--mut);font-size:.92rem;line-height:1.5}
+.note,.d{font-size:.88rem;line-height:1.55;color:var(--mut)}
+.d{padding:12px 14px;border:1px solid var(--rule);border-radius:10px;background:var(--wash);color:var(--ink);max-width:68ch}
+footer.foot{background:#0f1a24;color:#c4cfd9;margin-top:24px;padding:42px 0 30px;font-size:.92rem;line-height:1.6}
+footer.foot a{color:#e6edf3}
+footer.foot .cols{display:grid;gap:30px;grid-template-columns:1.5fr 1fr 1fr}
+@media(max-width:720px){footer.foot .cols{grid-template-columns:1fr}}
+footer.foot .brand{color:#fff;padding:0 0 10px}
+footer.foot h3{font:600 .85rem/1.3 var(--sans);color:#8fa1b1;margin:0 0 12px}
+footer.foot ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+footer.foot p{margin:0 0 10px;max-width:46ch}
+footer.foot .fine{border-top:1px solid #243342;margin-top:30px;padding-top:18px;font-size:.82rem;color:#93a4b3;max-width:none}
+@media(max-width:640px){main table.rank{display:table}.rank th:first-child,.rank td:first-child{display:none}.rank th,.rank td{padding:10px 6px;font-size:.9rem}#out tr:first-child td:nth-child(2){box-shadow:inset 4px 0 0 var(--brand)}}
+@media(max-width:640px){main table.entry,.entry tbody{display:block}.entry tr:first-child{display:none}.entry tr{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:14px 0;border-bottom:1px solid var(--rule)}.entry td{display:block;padding:0;border:0}.entry td:first-child{grid-column:1/-1;font-weight:600}.entry td:nth-child(3){grid-column:1/-1;order:5;color:var(--mut);font-size:.85rem}.entry td[data-l]::before{content:attr(data-l);display:block;font:500 .8rem var(--sans);color:var(--mut);margin-bottom:4px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header.top nav,footer.foot,.aff{display:none}.band{background:none}}
 `;
 
 const CALC_JS = `
@@ -76,26 +144,58 @@ document.querySelectorAll('input').forEach(i=>i.addEventListener('input', window
 (window.__RUN__==='pair'?runPair:runIndex)();
 `;
 
-const layout = ({ title, desc, canonical, body, extraHead = '' }) => `<!doctype html>
+const ADSENSE_ID = 'ca-pub-1399340452541176';
+const MARK = `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#0e6b50"/><path fill="#fff" d="M16 5.5c.5 3.4 2.4 5 4.5 7.4 2 2.300 3.100 4.200 3.100 6.800a7.600 7.600 0 0 1-15.200 0c0-3.200 1.700-5.300 3.400-6.600.2 1.700.9 2.800 2 3.200-.4-4 .4-7.400 2.200-10.800z"/><path fill="#0e6b50" d="M16 17.200c1.900 1.900 2.900 3.200 2.900 4.600a2.900 2.900 0 0 1-5.800 0c0-1.400 1-2.700 2.900-4.600z"/></svg>`;
+const NAV = [['/', 'Calculator'], ['/state/', 'By state'], ['/guides/', 'Guides'], ['/tools/heat-need/', 'Heat need'], ['/about/', 'About']];
+const navHtml = c => NAV.map(([h, t]) => `<a href="${h}"${(h === '/' ? (c === '/' || c.startsWith('/compare/')) : c.startsWith(h)) ? ' aria-current="page"' : ''}>${t}</a>`).join('');
+const crumbsFor = c => {
+  if (c === '/') return '';
+  const seg = c.split('/').filter(Boolean);
+  const trail = [['/', 'Calculator']];
+  if (seg.length > 1 && seg[0] === 'state') trail.push(['/state/', 'By state']);
+  if (seg.length > 1 && seg[0] === 'guides') trail.push(['/guides/', 'Guides']);
+  return `<p class="crumbs">${trail.map(([h, t]) => `<a href="${h}">${t}</a>`).join(' / ')}</p>`;
+};
+const splitBody = body => {
+  const m = body.match(/^\s*<h1>([\s\S]*?)<\/h1>\s*(<p>[\s\S]*?<\/p>)?/);
+  if (!m) return { h1: '', lead: '', rest: body };
+  let lead = m[2] || '', rest = body.slice(m[0].length);
+  if (lead && lead.replace(/<[^>]+>/g, '').length > 300) { rest = lead + rest; lead = ''; }
+  return { h1: m[1], lead: lead.replace(/^<p>/, '<p class="lead">'), rest };
+};
+const TRUST = ['Free to use', 'No sign-up', 'Your numbers stay in your browser'];
+
+const layout = ({ title, desc, canonical, body, extraHead = '', trust = false, noindex = false }) => {
+  const { h1, lead, rest } = splitBody(body);
+  return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
-<link rel="canonical" href="${SITE_URL}${canonical}">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A5%3C/text%3E%3C/svg%3E">
+<link rel="canonical" href="${SITE_URL}${canonical}">${noindex ? '\n<meta name="robots" content="noindex">' : ''}
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="theme-color" content="#0e6b50">
 <meta property="og:type" content="website"><meta property="og:site_name" content="${SITE_NAME}">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}">
-<meta property="og:url" content="${SITE_URL}${canonical}"><meta name="twitter:card" content="summary">
+<meta property="og:url" content="${SITE_URL}${canonical}"><meta property="og:image" content="${SITE_URL}/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/style.css">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-VD6P0Z7NSE"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-VD6P0Z7NSE");</script>
-<!-- ADSENSE: paste AdSense script here after approval -->
+<meta name="google-adsense-account" content="${ADSENSE_ID}">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_ID}" crossorigin="anonymous"></script>
 ${extraHead}
 </head><body>
-<header><div class="w"><a href="/">🔥 ${SITE_NAME}</a></div></header>
-<main class="w">${body}</main>
-<footer><div class="w">
-<p><b>Disclosure:</b> As an Amazon Associate I earn from qualifying purchases. Some links on this site are affiliate links; we may earn a commission at no cost to you. Figures are estimates based on standard fuel energy content and typical equipment efficiency. Actual costs vary with your home, climate, equipment and local prices. Not professional advice.</p>
-<p><a href="/tools/heat-need/">Find your heat need</a> · <a href="/guides/">Guides</a> · <a href="/state/">By state</a> · <a href="/about/">About &amp; methodology</a> · <a href="/privacy/">Privacy</a></p>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="w"><a class="brand" href="/">${MARK}${SITE_NAME}</a><nav class="main" aria-label="Main">${navHtml(canonical)}</nav></div></header>
+<div class="band${trust ? ' wide' : ''}"><div class="w">${crumbsFor(canonical)}<h1>${h1}</h1>${lead}${trust ? `<ul class="trust">${TRUST.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}</div></div>
+<main id="main" class="w">${rest}</main>
+<footer class="foot"><div class="w">
+<div class="cols">
+<div><a class="brand" href="/">${MARK}${SITE_NAME}</a><p>Free calculators and plain-English guides for comparing home heating costs. Starting prices come from the U.S. Energy Information Administration; replace them with your own.</p></div>
+<div><h3>Explore</h3><ul><li><a href="/">Heating cost calculator</a></li><li><a href="/state/">Costs by state</a></li><li><a href="/guides/">Guides</a></li><li><a href="/tools/heat-need/">Find your heat need</a></li></ul></div>
+<div><h3>About</h3><ul><li><a href="/about/">About &amp; methodology</a></li><li><a href="/contact/">Contact</a></li><li><a href="/privacy/">Privacy policy</a></li></ul></div>
+</div>
+<p class="fine"><b>Disclosure:</b> As an Amazon Associate I earn from qualifying purchases. Some links on this site are affiliate links; we may earn a commission at no cost to you. Figures are estimates based on standard fuel energy content and typical equipment efficiency. Actual costs vary with your home, climate, equipment and local prices. Not professional advice. &copy; 2026 ${SITE_NAME}</p>
 </div></footer></body></html>`;
+};
 
 const AMAZON_TAG = process.env.AMAZON_TAG || 'earthazoid-20';
 const amz = q => `https://www.amazon.com/s?k=${encodeURIComponent(q)}&tag=${AMAZON_TAG}`;
@@ -183,20 +283,29 @@ ${affiliateSlot('Planning an upgrade?', [a, b])}
 }
 
 // ---------- Home ----------
+const guideCards = `<ul class="cards">
+<li><a href="/tools/heat-need/"><strong>How much heat does your home use?</strong><span>Turn a year of fuel bills into the one number every calculator here needs.</span></a></li>
+<li><a href="/guides/heat-pump-vs-oil-what-decides/"><strong>Heat pump vs heating oil</strong><span>The break-even electricity price, and what decides who wins.</span></a></li>
+<li><a href="/guides/propane-vs-heating-oil/"><strong>Propane vs heating oil</strong><span>Why the price per gallon misleads, with break-even prices.</span></a></li>
+<li><a href="/guides/wood-pellets-vs-cordwood/"><strong>Wood pellets vs cordwood</strong><span>Cost per unit of heat, plus labor, moisture and storage.</span></a></li>
+<li><a href="/guides/btu-mmbtu-therm-kwh/"><strong>BTU, MMBtu, therm and kWh</strong><span>The units behind heating costs, with worked examples.</span></a></li>
+</ul>`;
 const inputs = SYSTEMS.map(s => `<div><label for="p-${s.id}">${esc(s.name)} ($ per ${s.unit})</label><input id="p-${s.id}" type="number" step="0.01" value="${s.price}"></div>`).join('');
 const allLinks = pairs.map(([x, y]) => `<li><a href="/compare/${x.id}-vs-${y.id}/">${esc(x.short)} vs ${esc(y.short)}</a></li>`).join('');
 write('index.html', layout({
   title: 'Home Heating Cost Calculator: Compare Oil, Propane, Gas, Electric, Heat Pump, Pellets',
   desc: 'Free calculator that ranks home heating systems by yearly cost using your local fuel prices.',
   canonical: '/',
-  body: `<h1>Home Heating Cost Calculator</h1>
-<p>Enter your local fuel prices to rank eight common heating systems by estimated yearly cost. Starting prices for oil, propane, gas and electricity are U.S. average winter 2026-27 forecasts from the EIA; kerosene, pellets and cordwood are rough estimates. Replace them with your own local prices.</p>
+  trust: true,
+  body: `<h1>Home Heating Cost Calculator: Compare Eight Systems</h1>
+<p>See which way of heating your home costs least this winter. Enter your own fuel prices and the table ranks everything from oil to heat pumps.</p>
 <div class="card"><div class="grid">${inputs}
 <div><label for="load">Annual heat needed (MMBtu delivered) · <a href="/tools/heat-need/">find yours</a></label><input id="load" type="number" value="${DEFAULT_LOAD}"></div></div>
-<table><tr><th>#</th><th>System</th><th>Cost per MMBtu</th><th>Estimated yearly cost</th></tr><tbody id="out"></tbody></table></div>
+<table class="rank"><tr><th>#</th><th>System</th><th>Cost per MMBtu</th><th>Estimated yearly cost</th></tr><tbody id="out"></tbody></table>
+<p class="mut">Starting prices for oil, propane, gas and electricity are U.S. average winter 2026-27 forecasts from the EIA. Kerosene, pellets and cordwood are rough estimates. Replace every price with your own.</p></div>
 ${affiliateSlot('Compare heating options')}
 <h2>Heating costs by state</h2><p><a href="/state/">Start with your state's electricity rate →</a></p>
-<h2>Tools and guides</h2><ul><li><a href="/tools/heat-need/">How much heat does your home use? (from your fuel bills)</a></li><li><a href="/guides/heat-pump-vs-oil-what-decides/">Heat pump vs heating oil: what decides which costs less</a></li><li><a href="/guides/btu-mmbtu-therm-kwh/">BTU, MMBtu, therm and kWh explained</a></li><li><a href="/guides/propane-vs-heating-oil/">Propane vs heating oil</a></li><li><a href="/guides/wood-pellets-vs-cordwood/">Wood pellets vs cordwood</a></li></ul>
+<h2>Tools and guides</h2>${guideCards}
 <h2>Head-to-head comparisons</h2><ul class="links">${allLinks}</ul>
 <script>window.__SYS__=${JSON.stringify(SYSTEMS)};window.__RUN__='index';</script><script src="/calc.js"></script>`,
 }));
@@ -243,7 +352,7 @@ for (const name of stateNames) {
 <p>${esc(name)} residential electricity averaged <b>${cents.toFixed(2)} cents per kWh</b> in August 2026 (EIA), which ranks ${rank} of ${ranked.length} among states and DC from highest to lowest. Electricity price is the biggest state-by-state difference for heat pumps and electric heat, so the calculator below starts with ${esc(name)}'s rate for those two systems and U.S. average winter 2026-27 forecasts for oil, propane and natural gas. Replace any price with your own.</p>
 <div class="card"><div class="grid">${inputs2}
 <div><label for="load">Annual heat needed (MMBtu delivered) · <a href="/tools/heat-need/">find yours</a></label><input id="load" type="number" value="${DEFAULT_LOAD}"></div></div>
-<table><tr><th>#</th><th>System</th><th>Cost per MMBtu</th><th>Estimated yearly cost</th></tr><tbody id="out"></tbody></table></div>
+<table class="rank"><tr><th>#</th><th>System</th><th>Cost per MMBtu</th><th>Estimated yearly cost</th></tr><tbody id="out"></tbody></table></div>
 ${affiliateSlot(`Heating a home in ${name}?`, [hp, oil])}
 <h2>${esc(name)} at default prices</h2>
 <ul>
@@ -270,9 +379,9 @@ write('state/index.html', layout({
 urls.push('/tools/heat-need/');
 {
   const rows = SYSTEMS.map(s => `<tr><td>${esc(s.name)}</td>
-<td><input id="amt-${s.id}" type="number" min="0" step="any" placeholder="0" aria-label="${esc(s.short)} used per year"></td>
+<td data-l="Used per year"><input id="amt-${s.id}" type="number" min="0" step="any" placeholder="0" aria-label="${esc(s.short)} used per year"></td>
 <td>${esc(s.unit)}${s.unit === 'kWh' ? ' (heating only)' : ''}</td>
-<td><input id="eff-${s.id}" type="number" min="1" step="1" value="${Math.round(s.eff * 100)}" aria-label="${esc(s.short)} efficiency percent"></td></tr>`).join('');
+<td data-l="Efficiency %"><input id="eff-${s.id}" type="number" min="1" step="1" value="${Math.round(s.eff * 100)}" aria-label="${esc(s.short)} efficiency percent"></td></tr>`).join('');
   const js = `
 const SYS=${JSON.stringify(SYSTEMS.map(s => ({ id: s.id, btu: s.btu })))};
 function run(){let t=0;for(const s of SYS){const a=parseFloat(document.getElementById('amt-'+s.id).value)||0;const e=(parseFloat(document.getElementById('eff-'+s.id).value)||0)/100;t+=a*s.btu*e/1e6;}
@@ -284,7 +393,7 @@ document.querySelectorAll('input').forEach(i=>i.addEventListener('input',run));r
 <h1>How Much Heat Does Your Home Use?</h1>
 <p>Enter what you actually burned or used for heating over a full year, from your fuel delivery receipts or utility bills. The tool converts it to <b>MMBtu of delivered heat</b>, the number every calculator on this site asks for. It multiplies each fuel by its energy content and by your system's efficiency, so a gallon of oil burned in an 85% efficient boiler counts for less than the gallon's full energy.</p>
 <div class="card">
-<table><tr><th>Fuel / system</th><th>Used per year</th><th>Unit</th><th>Efficiency %</th></tr>${rows}</table>
+<table class="entry"><tr><th>Fuel / system</th><th>Used per year</th><th>Unit</th><th>Efficiency %</th></tr>${rows}</table>
 <p>Delivered heat: <span class="big" id="res">0.0</span> MMBtu per year</p>
 <p id="go"></p>
 </div>
@@ -392,12 +501,7 @@ ${affiliateSlot('Wood heat essentials', [pel, cord])}`;
   write('guides/wood-pellets-vs-cordwood/index.html', layout({ title: 'Wood Pellets vs Cordwood: Cost Per Unit of Heat', desc: 'Compare wood pellets and cordwood by delivered heat cost, oil-equivalent gallons, labor, moisture and storage.', canonical: '/guides/wood-pellets-vs-cordwood/', body: woody }));
 
   write('guides/index.html', layout({ title: 'Home Heating Guides', desc: 'Guides to heating units, efficiency and heat pump vs oil economics.', canonical: '/guides/',
-    body: `<h1>Home Heating Guides</h1><ul>
-<li><a href="/guides/btu-mmbtu-therm-kwh/">BTU, MMBtu, therm and kWh: the units behind heating costs</a></li>
-<li><a href="/guides/propane-vs-heating-oil/">Propane vs heating oil: which is cheaper to heat with?</a></li>
-<li><a href="/guides/wood-pellets-vs-cordwood/">Wood pellets vs cordwood: cost per unit of heat</a></li>
-<li><a href="/guides/heat-pump-vs-oil-what-decides/">Heat pump vs heating oil: what decides which costs less</a></li>
-<li><a href="/tools/heat-need/">Tool: how much heat does your home use?</a></li></ul>` }));
+    body: `<h1>Home Heating Guides</h1><p>Plain-English explanations of the numbers behind heating costs.</p>${guideCards}` }));
 }
 
 // ---------- About / Privacy ----------
@@ -410,11 +514,31 @@ write('privacy/index.html', layout({ title: 'Privacy Policy', desc: 'How this si
 <p>Some links go to Amazon.com and include our Amazon Associates tracking ID. When you click one, Amazon may set cookies and collect information under its own privacy notice. As an Amazon Associate I earn from qualifying purchases.</p>
 <h2>Analytics</h2>
 <p>We use Google Analytics to understand which pages are useful. It may set cookies and collect anonymized usage data such as pages viewed, approximate location and device type. You can opt out with the Google Analytics opt-out browser add-on or by blocking cookies in your browser.</p>
-<h2>Hosting and advertising</h2>
-<p>This site is hosted on Netlify, which may log visitor IP addresses as part of serving pages. We may add advertising services in the future; if we do, this page will be updated to describe them, and those services may use cookies.</p>
+<h2>Advertising</h2>
+<p>This site uses Google AdSense to show ads. Google and its advertising partners use cookies to serve ads based on your visits to this and other websites. You can manage or turn off personalized ads in <a href="https://adssettings.google.com">Google Ads Settings</a>, learn how Google uses information from sites that use its services at <a href="https://policies.google.com/technologies/partner-sites">policies.google.com/technologies/partner-sites</a>, or opt out of many third-party ad vendors at <a href="https://www.aboutads.info">aboutads.info</a>.</p>
+<h2>Hosting</h2>
+<p>This site is hosted on Netlify, which may log visitor IP addresses as part of serving pages.</p>
+<h2>Contact form</h2>
+<p>If you send a message through the contact page, we receive the name, email address and message you type, and use them only to reply.</p>
 <h2>Third-party sites</h2>
 <p>Links to other websites are governed by those sites' own policies.</p>` }));
 urls.push('/about/', '/privacy/');
+
+urls.push('/contact/');
+write('contact/index.html', layout({ title: 'Contact HeatCostCalc', desc: 'Send a correction, question or suggestion about the heating cost calculators.', canonical: '/contact/',
+  body: `<h1>Contact</h1><p>Found a price that looks wrong, a calculation that does not add up, or a comparison you would like to see? Send a note.</p>
+<div class="card"><form name="contact" method="POST" action="/contact/thanks/" data-netlify="true" netlify-honeypot="bot-field">
+<input type="hidden" name="form-name" value="contact">
+<p hidden><label>Leave this empty <input name="bot-field"></label></p>
+<div class="grid"><div><label for="cn">Your name</label><input id="cn" name="name" autocomplete="name" required></div>
+<div><label for="ce">Your email</label><input id="ce" name="email" type="email" autocomplete="email" required></div></div>
+<p><label for="cm">Message</label><textarea id="cm" name="message" required></textarea></p>
+<button class="btn" type="submit">Send message</button></form></div>
+<p class="mut">We use your details only to reply. See the <a href="/privacy/">privacy policy</a>. This site gives general estimates, not personal financial, tax or engineering advice.</p>` }));
+write('contact/thanks/index.html', layout({ title: 'Message sent', desc: 'Thanks for your message.', canonical: '/contact/thanks/', noindex: true,
+  body: `<h1>Thanks, your message was sent</h1><p>We read every message and reply when we can.</p><p><a class="btn" href="/">Back to the calculator</a></p>` }));
+write('ads.txt', `google.com, pub-1399340452541176, DIRECT, f08c47fec0942fa0\n`);
+write('favicon.svg', MARK);
 
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `<url><loc>${SITE_URL}${u}</loc></url>`).join('\n')}\n</urlset>\n`);
 write('404.html', layout({ title: 'Page not found', desc: 'Page not found.', canonical: '/404.html',
