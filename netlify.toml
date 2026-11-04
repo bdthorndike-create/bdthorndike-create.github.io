@@ -1,3 +1,4 @@
 # Static site: no build step. Files at the repo root are published as-is.
 [build]
   publish = "."
+# Contact form handled by Netlify Forms (form name: contact).
